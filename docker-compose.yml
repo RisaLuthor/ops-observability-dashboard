@@ -13,6 +13,7 @@ services:
       context: ./ui
     environment:
       - NEXT_PUBLIC_API_BASE=http://api:8001
+      - NEXT_PUBLIC_OPS_API_TOKEN=${OPS_API_TOKEN:-dev-local-token}
     ports:
       - "3000:3000"
     depends_on:
