@@ -2,15 +2,18 @@ services:
   api:
     build:
       context: ./api
+    environment:
+      - OPS_API_TOKEN=${OPS_API_TOKEN:-dev-local-token}
     ports:
       - "8001:8001"
-    environment:
-      - PORT=8001
+    command: ["python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8001"]
 
   ui:
     build:
       context: ./ui
+    environment:
+      - NEXT_PUBLIC_API_BASE=http://api:8001
     ports:
       - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_BASE=http://localhost:8001
+    depends_on:
+      - api
