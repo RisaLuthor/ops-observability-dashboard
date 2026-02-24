@@ -1,4 +1,3 @@
-cat > api/src/metrics.py <<'PY'
 import time
 from collections import defaultdict
 from typing import Dict
@@ -50,4 +49,3 @@ class MetricsStore:
         }
 
 metrics_store = MetricsStore()
-PY

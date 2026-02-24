@@ -1,4 +1,4 @@
-cat > api/src/main.py <<'PY'
+
 import time
 from fastapi import FastAPI, Request
 from .metrics import metrics_store
@@ -29,4 +29,3 @@ def health():
 @app.get("/metrics")
 def metrics():
     return metrics_store.snapshot()
-PY
