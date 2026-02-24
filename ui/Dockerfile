@@ -1,8 +1,11 @@
 FROM node:20-alpine
 
 WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
 COPY . .
 
-RUN echo "UI scaffold placeholder. Next step will initialize Next.js."
-
-CMD ["sh", "-c", "echo 'UI not initialized yet. Next step: create Next.js app.' && sleep 3600"]
+EXPOSE 3000
+CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0", "--port", "3000"]
