@@ -1,31 +1,41 @@
-import os
+import importlib
 from fastapi.testclient import TestClient
 
-from src.main import app
 
-client = TestClient(app)
+def make_client(monkeypatch, *, token="testtoken", db_path=None):
+    # set env FIRST
+    monkeypatch.setenv("OPS_API_TOKEN", token)
+    if db_path:
+        monkeypatch.setenv("EVENTS_DB_PATH", str(db_path))
 
-def test_post_event_requires_token(monkeypatch):
-    monkeypatch.setenv("OPS_API_TOKEN", "testtoken")
+    # reload modules so they pick up env
+    import src.events_store
+    import src.main
 
-    r = client.post("/events", json={
-        "level": "INFO",
-        "type": "OPS",
-        "service": "api",
-        "message": "hello",
-        "meta": {"k": "v"},
-    })
+    importlib.reload(src.events_store)
+    importlib.reload(src.main)
+
+    return TestClient(src.main.app)
+
+
+def test_post_event_requires_token(monkeypatch, tmp_path):
+    client = make_client(monkeypatch, db_path=tmp_path / "events.db")
+
+    r = client.post(
+        "/events",
+        json={
+            "level": "INFO",
+            "type": "OPS",
+            "service": "api",
+            "message": "hello",
+            "meta": {"k": "v"},
+        },
+    )
     assert r.status_code == 401
 
-def test_post_event_and_list(monkeypatch, tmp_path):
-    monkeypatch.setenv("OPS_API_TOKEN", "testtoken")
-    monkeypatch.setenv("EVENTS_DB_PATH", str(tmp_path / "events.db"))
 
-    # reload store module with new env
-    import importlib
-    from src import events_store
-    importlib.reload(events_store)
-    from src.events_store import event_store  # noqa: F401
+def test_post_event_and_list(monkeypatch, tmp_path):
+    client = make_client(monkeypatch, db_path=tmp_path / "events.db")
 
     r = client.post(
         "/events",
@@ -39,6 +49,7 @@ def test_post_event_and_list(monkeypatch, tmp_path):
         },
     )
     assert r.status_code == 200
+
     created = r.json()
     assert created["level"] == "WARN"
     assert created["service"] == "api"
@@ -48,3 +59,4 @@ def test_post_event_and_list(monkeypatch, tmp_path):
     assert g.status_code == 200
     items = g.json()
     assert isinstance(items, list)
+    assert len(items) >= 1
