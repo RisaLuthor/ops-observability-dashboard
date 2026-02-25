@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 
 def make_client(monkeypatch, *, token="testtoken", db_path=None):
     monkeypatch.setenv("OPS_API_TOKEN", token)
-    if db_path:
+    if db_path is not None:
         monkeypatch.setenv("EVENTS_DB_PATH", str(db_path))
 
     import src.events_store

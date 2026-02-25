@@ -33,7 +33,7 @@ jobs:
 
       - name: Pytest
         run: |
-          pytest -q
+          pytest -m pytest
 
   docker-compose-smoke:
     runs-on: ubuntu-latest
