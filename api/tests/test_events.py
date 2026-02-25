@@ -3,12 +3,10 @@ from fastapi.testclient import TestClient
 
 
 def make_client(monkeypatch, *, token="testtoken", db_path=None):
-    # set env FIRST
     monkeypatch.setenv("OPS_API_TOKEN", token)
     if db_path:
         monkeypatch.setenv("EVENTS_DB_PATH", str(db_path))
 
-    # reload modules so they pick up env
     import src.events_store
     import src.main
 
