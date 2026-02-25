@@ -3,17 +3,20 @@ from fastapi.testclient import TestClient
 
 
 def make_client(monkeypatch, *, token="testtoken", db_path=None):
+    # Set env FIRST
     monkeypatch.setenv("OPS_API_TOKEN", token)
     if db_path is not None:
         monkeypatch.setenv("EVENTS_DB_PATH", str(db_path))
 
-    import src.events_store
-    import src.main
+    # Import via package path (stable in CI when running from repo root)
+    import api.src.events_store as events_store
+    import api.src.main as main
 
-    importlib.reload(src.events_store)
-    importlib.reload(src.main)
+    # Reload so modules re-read env vars
+    importlib.reload(events_store)
+    importlib.reload(main)
 
-    return TestClient(src.main.app)
+    return TestClient(main.app)
 
 
 def test_post_event_requires_token(monkeypatch, tmp_path):
