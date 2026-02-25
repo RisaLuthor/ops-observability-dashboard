@@ -26,12 +26,10 @@ jobs:
 
       - name: Import smoke test
         run: |
-          python -c "import fastapi; print('fastapi ok')"
           python -c "import src.main"
 
       - name: Pytest
         run: |
-          python -m pip install pytest
           pytest -q
 
   docker-compose-smoke:
@@ -40,15 +38,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build and start
+      - name: Build and start (compose)
+        env:
+          OPS_API_TOKEN: ci-token
         run: |
           docker compose up -d --build
-          sleep 3
+          sleep 5
 
       - name: Smoke test
         run: |
           curl -fsS http://localhost:8001/health
           curl -fsS http://localhost:8001/metrics
+          curl -fsS http://localhost:8001/events?limit=1
           curl -fsS http://localhost:3000 > /dev/null
 
       - name: Logs on failure
