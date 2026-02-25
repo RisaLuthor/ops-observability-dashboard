@@ -29,6 +29,8 @@ jobs:
           python -c "import src.main"
 
       - name: Pytest
+        env:
+          PYTHONPATH:
         run: |
           pytest -q
 
@@ -62,6 +64,8 @@ jobs:
           exit 1
 
       - name: Smoke test (API)
+        env:
+          PYTHONPATH:
         run: |
           curl -fsS http://localhost:8001/health
           curl -fsS http://localhost:8001/metrics
