@@ -10,8 +10,6 @@ jobs:
     defaults:
       run:
         working-directory: api
-    env:
-      PYTHONPATH: ${{ github.workspace }}/api
 
     steps:
       - uses: actions/checkout@v4
@@ -27,13 +25,20 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Import smoke test
+      - name: Debug paths
         run: |
-          python -c "from src.main import app; print('import ok')"
+          pwd
+          ls -la
+          ls -la src || true
+          python -c "import sys; print('sys.path:', sys.path)"
 
-      - name: Pytest
+      - name: Import smoke test (force PYTHONPATH)
         run: |
-          pytest -m pytest -q
+          PYTHONPATH="$GITHUB_WORKSPACE/api" python -c "from src.main import app; print('import ok')"
+
+      - name: Pytest (force PYTHONPATH)
+        run: |
+          PYTHONPATH="$GITHUB_WORKSPACE/api" python -m pytest -q
 
   docker-compose-smoke:
     runs-on: ubuntu-latest
