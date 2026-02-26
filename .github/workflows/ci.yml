@@ -11,30 +11,27 @@ jobs:
       PYTHONPATH: ${{ github.workspace }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
           cache-dependency-path: api/requirements.txt
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r api/requirements.txt
           python -m pip install pytest
 
-      - name: Debug importability
+      - name: Import smoke test
         run: |
-          pwd
-          ls -la
-          ls -la api || true
-          ls -la api/src || true
-          python -c "import sys; print('PYTHONPATH=', __import__('os').environ.get('PYTHONPATH')); print('sys.path[0:5]=', sys.path[0:5])"
           python -c "from api.src.main import app; print('import ok')"
 
-      - name: Pytest
+      - name: Run tests
         run: |
           python -m pytest -q api/tests
 
@@ -42,7 +39,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Build and start (compose)
         env:
