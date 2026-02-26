@@ -1,7 +1,7 @@
-import os
 import sys
+from pathlib import Path
 
-# Add the api/ directory to sys.path so "import src.*" works in GitHub Actions.
-API_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-if API_DIR not in sys.path:
-    sys.path.insert(0, API_DIR)
+# repo root = .../ops-observability-dashboard
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))

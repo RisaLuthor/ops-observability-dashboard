@@ -1,18 +1,20 @@
 import importlib
 from fastapi.testclient import TestClient
 
+
 def make_client(monkeypatch, *, token="testtoken", db_path=None):
     monkeypatch.setenv("OPS_API_TOKEN", token)
     if db_path is not None:
         monkeypatch.setenv("EVENTS_DB_PATH", str(db_path))
 
-    import api.events_store as events_store
+    import api.src.events_store as events_store
     import api.main as main
 
     importlib.reload(events_store)
     importlib.reload(main)
 
     return TestClient(main.app)
+
 
 def test_post_event_requires_token(monkeypatch, tmp_path):
     client = make_client(monkeypatch, db_path=tmp_path / "events.db")
@@ -27,8 +29,8 @@ def test_post_event_requires_token(monkeypatch, tmp_path):
             "meta": {"k": "v"},
         },
     )
-    # some implementations use 401, some use 403
-    assert r.status_code in (401, 403)
+    assert r.status_code == 401
+
 
 def test_post_event_and_list(monkeypatch, tmp_path):
     client = make_client(monkeypatch, db_path=tmp_path / "events.db")
@@ -49,6 +51,7 @@ def test_post_event_and_list(monkeypatch, tmp_path):
     created = r.json()
     assert created["level"] == "WARN"
     assert created["service"] == "api"
+    assert created["meta"]["type"] == "AUDIT"
 
     g = client.get("/events?limit=10")
     assert g.status_code == 200
