@@ -1,0 +1,27 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.venv/
+.env
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# OS/Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local data artifacts
+data/*.db

@@ -1,0 +1,30 @@
+[tool.pytest.ini_options]
+testpaths = ["api/tests"]
+addopts = "-q"
+pythonpath = ["api"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+fix = false
+exclude = ["__pycache__", ".venv", ".mypy_cache", ".pytest_cache", ".ruff_cache"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]  # allow long lines; Black will handle formatting decisions
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+pretty = true
+
+# If you want mypy to be stricter later, flip these:
+# disallow_untyped_defs = true
+# no_implicit_optional = true
