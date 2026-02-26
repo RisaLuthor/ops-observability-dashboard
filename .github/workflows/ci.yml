@@ -7,6 +7,8 @@ on:
 jobs:
   api-tests:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: ${{ github.workspace }}
 
     steps:
       - uses: actions/checkout@v4
@@ -23,8 +25,13 @@ jobs:
           python -m pip install -r api/requirements.txt
           python -m pip install pytest
 
-      - name: Import smoke test
+      - name: Debug importability
         run: |
+          pwd
+          ls -la
+          ls -la api || true
+          ls -la api/src || true
+          python -c "import sys; print('PYTHONPATH=', __import__('os').environ.get('PYTHONPATH')); print('sys.path[0:5]=', sys.path[0:5])"
           python -c "from api.src.main import app; print('import ok')"
 
       - name: Pytest
