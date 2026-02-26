@@ -6,8 +6,8 @@ def make_client(monkeypatch, *, token="testtoken", db_path=None):
     if db_path is not None:
         monkeypatch.setenv("EVENTS_DB_PATH", str(db_path))
 
-    import api.events_store as events_store
-    import api.main as main
+    import api.src.events_store as events_store
+    import api.src.main as main
 
     importlib.reload(events_store)
     importlib.reload(main)
@@ -27,7 +27,6 @@ def test_post_event_requires_token(monkeypatch, tmp_path):
             "meta": {"k": "v"},
         },
     )
-    # some implementations use 401, some use 403
     assert r.status_code in (401, 403)
 
 def test_post_event_and_list(monkeypatch, tmp_path):
