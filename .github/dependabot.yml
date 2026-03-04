@@ -1,17 +1,29 @@
 version: 2
-
 updates:
+  # GitHub Actions (workflows)
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 5
 
+  # Python API deps (api/requirements.txt)
   - package-ecosystem: "pip"
     directory: "/api"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 5
+    ignore:
+      # Avoid surprise major jumps unless you want them
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
+  # Frontend deps (if you have a UI package.json)
   - package-ecosystem: "npm"
-    directory: "/ui"
+    directory: "/"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
