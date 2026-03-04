@@ -2,7 +2,7 @@ name: SBOM
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
   pull_request:
   workflow_dispatch:
 
@@ -32,16 +32,14 @@ jobs:
 
           if [ -f api/requirements.txt ]; then
             echo "Generating SBOM from api/requirements.txt"
-            cyclonedx-py requirements -i api/requirements.txt -o sbom.cdx.json
+            cyclonedx-py requirements api/requirements.txt --of json -o sbom.cdx.json
           elif [ -f requirements.txt ]; then
             echo "Generating SBOM from requirements.txt"
-            cyclonedx-py requirements -i requirements.txt -o sbom.cdx.json
+            cyclonedx-py requirements requirements.txt --of json -o sbom.cdx.json
           else
-            echo "No requirements file found (api/requirements.txt or requirements.txt)."
+            echo "No requirements.txt found (api/requirements.txt or requirements.txt)."
             exit 1
           fi
-
-          ls -la sbom.cdx.json
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
