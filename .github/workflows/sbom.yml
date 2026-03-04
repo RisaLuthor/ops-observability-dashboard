@@ -1,0 +1,73 @@
+name: SBOM
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ---------- Python SBOM (api/) ----------
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install CycloneDX for Python
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install cyclonedx-bom
+
+      - name: Generate Python SBOM (api/)
+        run: |
+          set -e
+          if [ -f api/requirements.txt ]; then
+            echo "Generating SBOM from api/requirements.txt"
+            cyclonedx-py requirements -i api/requirements.txt -o sbom.api.cdx.json
+          elif [ -f api/pyproject.toml ]; then
+            echo "Generating SBOM from api/pyproject.toml"
+            cyclonedx-py poetry -p api/pyproject.toml -o sbom.api.cdx.json
+          else
+            echo "No api/requirements.txt or api/pyproject.toml found — skipping Python SBOM."
+            echo '{}' > sbom.api.cdx.json
+          fi
+
+      # ---------- Node SBOM (ui/) ----------
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Generate Node SBOM (ui/)
+        run: |
+          set -e
+          if [ -f ui/package.json ]; then
+            echo "Generating SBOM from ui/package.json"
+            cd ui
+            npm ci
+            npx --yes @cyclonedx/cyclonedx-npm --output-file ../sbom.ui.cdx.json --output-format JSON
+          else
+            echo "No ui/package.json found — skipping Node SBOM."
+            echo '{}' > sbom.ui.cdx.json
+          fi
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: |
+            sbom.api.cdx.json
+            sbom.ui.cdx.json
